@@ -413,7 +413,7 @@ CDetectionResult CRForest::detection(CTestDataset &testSet) const{
              maxLoc.y + y > 0){
             boost::shared_ptr<paramBin> pBin = paramVote[c][maxLoc.y + y][maxLoc.x +x];
             while(pBin){
-              std::cout << pBin->roll << " " << pBin->pitch << " " << pBin->yaw << std::endl;
+              //              std::cout << pBin->roll << " " << pBin->pitch << " " << pBin->yaw << std::endl;
               voteAngle.row(0) += calcGaussian(pBin->confidence, pBin->roll);//at<>[0][pBin->roll] 
               voteAngle.row(1) += calcGaussian(pBin->confidence, pBin->pitch);//at<>[0][pBin->roll] 
               voteAngle.row(2) += calcGaussian(pBin->confidence, pBin->yaw);//at<>[0][pBin->roll]
