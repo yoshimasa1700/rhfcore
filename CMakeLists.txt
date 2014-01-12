@@ -8,8 +8,8 @@ SET(CMAKE_CXX_FLAGS_RELEASE "-Wall -O2 -fpermissive -fPIC -pg")
 # デバッグビルド用オプション
 SET(CMAKE_CXX_FLAGS_DEBUG "-g -fpermissive -fPIC")
 # ビルドのタイプはリリース
-#SET(CMAKE_BUILD_TYPE Release)
-set(CMAKE_BUILD_TYPE Debug)
+SET(CMAKE_BUILD_TYPE Release)
+#set(CMAKE_BUILD_TYPE Debug)
 
 #set(CMAKE_CXX_FLAGS "$(CMAKE_CXX_FLAGS) -fpermissive")
 

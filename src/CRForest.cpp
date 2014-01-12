@@ -401,26 +401,28 @@ CDetectionResult CRForest::detection(CTestDataset &testSet) const{
     cv::Point min_pose[3], max_pose[3];
 
     cv::Mat voteAngle = cv::Mat::zeros(3, 720, CV_32FC1);
-
-    for(int x = -1 * conf.poseEC; x < conf.poseEC; ++x){
-      for(int y = -1 * conf.poseEC + x ; y < conf.poseEC - x; ++y){
+#pragma omp parallel
+    {
+#pragma omp for
+      for(int x = -1 * conf.poseEC; x < conf.poseEC; ++x){
+        for(int y = -1 * conf.poseEC + x ; y < conf.poseEC - x; ++y){
         
-        if(maxLoc.x + x < imgCol &&
-           maxLoc.y + y < imgRow &&
-           maxLoc.x + x > 0 &&
-           maxLoc.y + y > 0){
-          boost::shared_ptr<paramBin> pBin = paramVote[c][maxLoc.y + y][maxLoc.x +x];
-          while(pBin){
-            std::cout << pBin->roll << " " << pBin->pitch << " " << pBin->yaw << std::endl;
-            voteAngle.row(0) += calcGaussian(pBin->confidence, pBin->roll);//at<>[0][pBin->roll] 
-            voteAngle.row(1) += calcGaussian(pBin->confidence, pBin->pitch);//at<>[0][pBin->roll] 
-            voteAngle.row(2) += calcGaussian(pBin->confidence, pBin->yaw);//at<>[0][pBin->roll]
+          if(maxLoc.x + x < imgCol &&
+             maxLoc.y + y < imgRow &&
+             maxLoc.x + x > 0 &&
+             maxLoc.y + y > 0){
+            boost::shared_ptr<paramBin> pBin = paramVote[c][maxLoc.y + y][maxLoc.x +x];
+            while(pBin){
+              std::cout << pBin->roll << " " << pBin->pitch << " " << pBin->yaw << std::endl;
+              voteAngle.row(0) += calcGaussian(pBin->confidence, pBin->roll);//at<>[0][pBin->roll] 
+              voteAngle.row(1) += calcGaussian(pBin->confidence, pBin->pitch);//at<>[0][pBin->roll] 
+              voteAngle.row(2) += calcGaussian(pBin->confidence, pBin->yaw);//at<>[0][pBin->roll]
 
-            std::cout << "owari" << std::endl;
-            pBin = pBin->next;
+              pBin = pBin->next;
+            }
           }
-        }
         
+        }
       }
     }
 
