@@ -402,11 +402,11 @@ void extractPosPatches(std::vector<CPosDataset*> &posSet,
 	  pRatio.push_back(1.0);
 	  //pRatio.push_back(1.4);
           //        	  pRatio.push_back(1.5);
-          if(conf.learningMode == 2){
-            pRatio.push_back(2.0);
-            //            pRatio.push_back(2.5);
-            pRatio.push_back(3.0);
-          }
+          // if(conf.learningMode == 2){
+          //   pRatio.push_back(2.0);
+          //   //            pRatio.push_back(2.5);
+          //   pRatio.push_back(3.0);
+          // }
 	  // pRatio.push_back(3.4);
 	  // //	  pRatio.push_back(3.8);
 	  // pRatio.push_back(4.2);
