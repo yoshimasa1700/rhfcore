@@ -288,7 +288,8 @@ CDetectionResult CRForest::detection(CTestDataset &testSet) const{
 
 	      // vote to result image
 	      if(pos.x > 0 && pos.y > 0 && pos.x < voteImage[cl].cols && pos.y < voteImage[cl].rows){
-		double v = result[m]->pfg[cl] / result.at(m)->param.at(l).size() / conf.ntrees * conf.stride * conf.stride;// / ( result.size() * result.at(m)->param.at(l).size());// / (euclideanDist(cv::Point(), rPoint) + 1);
+                cv::Size classsize = classDatabase.vNode[cl].classSize;
+		double v = result[m]->pfg[cl] / result.at(m)->param.at(l).size() / conf.ntrees * conf.stride * conf.stride / classsize.width / classsize.height * 10000;// / ( result.size() * result.at(m)->param.at(l).size());// / (euclideanDist(cv::Point(), rPoint) + 1);
 
                 if(conf.learningMode != 2)
                   v *= centerDepth;
@@ -475,10 +476,10 @@ CDetectionResult CRForest::detection(CTestDataset &testSet) const{
     
 
     // if not in demo mode, output image to file
-    if(!conf.demoMode){
-      std::string outputName = opath + PATH_SEP + "detectionResult" + "_" + classDatabase.vNode[c].name + ".png";
-      cv::imwrite(outputName.c_str(),outputImage[c]);
-    }
+    // if(!conf.demoMode){
+    //   std::string outputName = opath + PATH_SEP + "detectionResult" + "_" + classDatabase.vNode[c].name + ".png";
+    //   cv::imwrite(outputName.c_str(),outputImage[c]);
+    // }
 
     
 
@@ -491,7 +492,12 @@ CDetectionResult CRForest::detection(CTestDataset &testSet) const{
     std::string nearestObject;
 
     for(unsigned int d = 0; d < testSet.param.size(); ++d){
-      double tempError = euclideanDist(maxLoc,testSet.param[d].getCenterPoint());std::sqrt(std::pow((double)(maxLoc.x - testSet.param[0].getCenterPoint().x), 2) + std::pow((double)(maxLoc.y - testSet.param[0].getCenterPoint().y), 2));
+      cv::Size classsize = classDatabase.vNode[c].classSize;
+      double tempError = // euclideanDist(maxLoc,testSet.param[d].getCenterPoint());
+          std::sqrt(std::pow((double)(maxLoc.x - testSet.param[0].getCenterPoint().x), 2)
+                    + std::pow((double)(maxLoc.y - testSet.param[0].getCenterPoint().y ), 2))
+          / std::sqrt(std::pow((double)classsize.width,2)
+                      + std::pow((double)classsize.height,2)) ;
       //std::cout << tempError << std::endl;
       if(tempError < minError){
 	minError = tempError;
