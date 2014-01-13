@@ -266,14 +266,14 @@ CDetectionResult CRForest::detection(CTestDataset &testSet) const{
 	      	cv::Mat realDepth = tempDepth(tempRect);
 	      	centerDepth = realDepth.at<ushort>(tempRect.height / 2 + 1, tempRect.width / 2 + 1) + conf.mindist;
 
-		double sca = (1024.0 - centerDepth) / 1024.0;
+		double sca = centerDepth;
 
                 //                std::cout << rPoint << std::endl;
                 
-	     	rPoint.x *= sca;
-	      	rPoint.y *= sca;
-	      	// rPoint.x /= 100;
-	      	// rPoint.y /= 100;
+	     	rPoint.x /= sca;
+	      	rPoint.y /= sca;
+	      	//rPoint.x /= 1000;
+	      	//rPoint.y /= 1000;
 
                 //                std::cout << rPoint << std::endl;		 
 	      	// rPoint.x = 0;

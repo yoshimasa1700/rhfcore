@@ -829,7 +829,7 @@ int normarizationCenterPointP(CPosPatch &patch, const CConfig &config, double cd
   // cv::Mat tempDepth = *patch.getDepth();
   // cv::Mat depth = tempDepth(patch.getRoi());
 
-  double sca = (1024.0 - cd) / 1024.0;
+  double sca = cd;
   
   //cv::Mat showDepth = cv::Mat(tempDepth.rows, tempDepth.cols, CV_8UC1);
 
@@ -854,10 +854,10 @@ int normarizationCenterPointP(CPosPatch &patch, const CConfig &config, double cd
   //std::cout << sca << std::endl;
 
   //    currentP.x = currentP.x * 10;
-  //currentP.y *= 1000;
-  //currentP.x *= 1000;
-  currentP.x = currentP.x / sca;
-  currentP.y = currentP.y / sca;
+  //  currentP.y *= 1000;
+  //  currentP.x *= 1000;
+  currentP.x *= sca;
+  currentP.y *= sca;
 
   //std::cout << "current p " << currentP << std::endl;
 
