@@ -36,7 +36,7 @@ double euclideanDist(cv::Point_<double> p, cv::Point_<double> q)
 
 void CRForest::learning(){
 
-#pragma omp parallel
+#pragma omp parallel num_threads(4)
   {
 #pragma omp for
     for(int i = 0;i < conf.ntrees; ++i){
