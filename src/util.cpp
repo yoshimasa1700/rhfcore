@@ -382,7 +382,7 @@ void extractPosPatches(std::vector<CPosDataset*> &posSet,
 	    //	  std::cout << "test" << std::endl;
 	    //if(conf.learningMode != 2){
 	    //	    std::cout << (double)tempDepth2.at<ushort>(conf.p_height / 2 + 1, conf.p_width / 2 + 1) << std::endl;
-	    normarizationByDepth(posTemp , conf, (double)tempDepth2.at<ushort>(conf.p_height / 2 + 1, conf.p_width / 2 + 1));
+            normarizationByDepth(posTemp , conf, (double)tempDepth2.at<ushort>(conf.p_height / 2 + 1, conf.p_width / 2 + 1));
 	    normarizationCenterPointP(posTemp, conf,(double)tempDepth2.at<ushort>(conf.p_height / 2 + 1, conf.p_width / 2 + 1));
 	    //}
 
@@ -771,57 +771,37 @@ int CClassDatabase::search(std::string str) const{
 }
 
 int normarizationByDepth(CPatch &patch, const CConfig &config, double cd){//, const CConfig &config)const {
-  // cv::Mat tempDepth = *patch.getDepth();
-  // cv::Mat depth = tempDepth(patch.getRoi());
 
-  //double sca = tempDepth.at<ushort>(config.p_height / 2 + 1, config.p_width / 2 + 1);
   if(cd == 0){
     std::cerr << "error! depth is 0, something wrong" << std::endl;
     exit(-1);
   }
+
+
+  cv::Mat tempFeature = *patch.getFeature(4);
+  cv::Rect tempRect = patch.getRoi();
+  cv::Mat realFeature = tempFeature(patch.getRoi());
+
+  double a = realFeature.at<double>(0,0) + realFeature.at<double>(tempRect.height,tempRect.width) - realFeature.at<double>(0,tempRect.width) - realFeature.at<double>(tempRect.height, 0);
+  a /= tempRect.height;
+  a /= tempRect.width;
   
   cv::Rect roi;
-  double sca = 1 - (500.0 - cd) / 500.0;
-
-  //std::cout << sca << std::endl;
-  //  std::cout << patch.getRoi() << std::endl;
-
-  // std::cout << patch.getRoi().width << " " << patch.getRoi().height << " "
-  //           << patch.getRoi().x << " " << patch.getRoi().y << std::endl;
+  double sca = 1 - (500.0 - a) / 500.0;
 
   roi.width = patch.getRoi().width / sca;
   roi.height = patch .getRoi().height / sca;
 
   roi.x = patch.getRoi().x - roi.width / 2;
   roi.y = patch.getRoi().y - roi.height / 2;
-  //std::cout << patch.getRoi() << std::endl;
-
-  // std::cout << roi.width << " " << roi.height << " "
-  //           << roi.x << " " << roi.y << std::endl;
 
   if(roi.x < 0) roi.x = 0;
   if(roi.y < 0) roi.y = 0;
   if(roi.x + roi.width > patch.getDepth()->cols) roi.width = patch.getDepth()->cols - roi.x;
   if(roi.y + roi.height > patch.getDepth()->rows) roi.height = patch.getDepth()->rows - roi.y;
 
-  //std::cout << sca << std::endl;
-
-  //std::cout << tempDepth.at<ushort>(config.p_height / 2 + 1, config.p_width / 2 + 1) << std::endl;
-  //std::cout << roi << std::endl;
-  //std::cout << "normarized roi is ";
-  //std::cout << roi << std::endl;
-  //rgb = rgb(roi);
   patch.setRoi(roi);
 
-  //  std::cout << roi << std::endl;
-  //cv::resize(rgb,rgb,cv::Size(config.p_width,config.p_height));
-
-
-  //                cv::namedWindow("test");
-  //                cv::imshow("test",rgb);
-  //                cv::waitKey(0);
-  //                cv::destroyAllWindows();
-  //    std::cout << "kokoke-" << std::endl;
   return 0;
 }
 
@@ -829,7 +809,15 @@ int normarizationCenterPointP(CPosPatch &patch, const CConfig &config, double cd
   // cv::Mat tempDepth = *patch.getDepth();
   // cv::Mat depth = tempDepth(patch.getRoi());
 
-  double sca = cd;
+  cv::Mat tempFeature = *patch.getFeature(4);
+  cv::Rect tempRect = patch.getRoi();
+  cv::Mat realFeature = tempFeature(patch.getRoi());
+
+  double a = realFeature.at<double>(0,0) + realFeature.at<double>(tempRect.height,tempRect.width) - realFeature.at<double>(0,tempRect.width) - realFeature.at<double>(tempRect.height, 0);
+  a /= tempRect.height;
+  a /= tempRect.width;
+  
+  double sca = a;
   
   //cv::Mat showDepth = cv::Mat(tempDepth.rows, tempDepth.cols, CV_8UC1);
 

@@ -1,22 +1,6 @@
 #include <boost/timer.hpp>
 #include "CRForest.h"
 
-// paramBin& paramBin::operator +(const paramBin& obj){ 
-//   this->roll += obj.roll;
-//   this->pitch += obj.pitch;
-//   this->yaw += obj.yaw;
-
-//   return *this;
-// }
-
-// paramBin& paramBin::operator +=(const paramBin& obj){
-//   this->roll += obj.roll;
-//   this->pitch += obj.pitch;
-//   this->yaw += obj.yaw;
-
-//   return *this;
-// }
-
 cv::Mat calcGaussian(double score, double center){
   cv::Mat vote = cv::Mat::zeros(1, 720, CV_32FC1);
   for(int i = -30; i <= 30; ++i){
@@ -264,9 +248,17 @@ CDetectionResult CRForest::detection(CTestDataset &testSet) const{
 	      	cv::Mat tempDepth = *testPatch[j].getDepth();
 	      	cv::Rect tempRect = testPatch[j].getRoi();
 	      	cv::Mat realDepth = tempDepth(tempRect);
+
+                cv::Mat tempFeature = *testPatch[j].getFeature(4);
+                cv::Mat realFeature = tempFeature(tempRect);
+
+                double a = realFeature.at<double>(0,0) + realFeature.at<double>(tempRect.height,tempRect.width) - realFeature.at<double>(0,tempRect.width) - realFeature.at<double>(tempRect.height, 0);
+                a /= tempRect.height;
+                a /= tempRect.width;
+                
 	      	centerDepth = realDepth.at<ushort>(tempRect.height / 2 + 1, tempRect.width / 2 + 1) + conf.mindist;
 
-		double sca = centerDepth;
+		double sca = a;//centerDepth;
 
                 //                std::cout << rPoint << std::endl;
                 
@@ -291,10 +283,10 @@ CDetectionResult CRForest::detection(CTestDataset &testSet) const{
                 cv::Size classsize = classDatabase.vNode[cl].classSize;
 		double v = result[m]->pfg[cl] / result.at(m)->param.at(l).size() / conf.ntrees * conf.stride * conf.stride / classsize.width / classsize.height * 10000;// / ( result.size() * result.at(m)->param.at(l).size());// / (euclideanDist(cv::Point(), rPoint) + 1);
 
-                if(conf.learningMode != 2)
-                  v *= centerDepth;
+                // if(conf.learningMode != 2)
+                //   v *= centerDepth;
 
-                if((rPoint.x)*(rPoint.x) + (rPoint.y)*(rPoint.y) > 100)
+                if((rPoint.x)*(rPoint.x) + (rPoint.y)*(rPoint.y) > 25)
                   voteImage[cl].at<float>(pos.y,pos.x) += v / 500;// * 10;//(result.at(m)->pfg.at(c) - 0.9);// * 100;//weight * 500;
 		// if(!conf.tsukubaMode){
 		  double ta[3] = {result.at(m)->param.at(l).at(n).getAngle()[0],
