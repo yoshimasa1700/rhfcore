@@ -772,37 +772,37 @@ int CClassDatabase::search(std::string str) const{
 
 int normarizationByDepth(CPatch &patch, const CConfig &config, double cd){//, const CConfig &config)const {
 
-  if(cd == 0){
-    std::cerr << "error! depth is 0, something wrong" << std::endl;
-    exit(-1);
-  }
+  // if(cd == 0){
+  //   std::cerr << "error! depth is 0, something wrong" << std::endl;
+  //   exit(-1);
+  // }
 
 
-  cv::Mat tempFeature = *patch.getFeature(4);
-  cv::Rect tempRect = patch.getRoi();
-  cv::Mat realFeature = tempFeature(patch.getRoi());
+  // cv::Mat tempFeature = *patch.getFeature(4);
+  // cv::Rect tempRect = patch.getRoi();
+  // cv::Mat realFeature = tempFeature(patch.getRoi());
 
-  double a = realFeature.at<double>(0,0) + realFeature.at<double>(tempRect.height,tempRect.width) - realFeature.at<double>(0,tempRect.width) - realFeature.at<double>(tempRect.height, 0);
-  a /= tempRect.height;
-  a /= tempRect.width;
+  // double a = realFeature.at<double>(0,0) + realFeature.at<double>(tempRect.height,tempRect.width) - realFeature.at<double>(0,tempRect.width) - realFeature.at<double>(tempRect.height, 0);
+  // a /= tempRect.height;
+  // a /= tempRect.width;
   
-  cv::Rect roi;
-  double sca = 1 - (500.0 - a) / 500.0;
+  // cv::Rect roi;
+  // double sca = 1 - (500.0 - a) / 500.0;
 
-  roi.width = patch.getRoi().width / sca;
-  roi.height = patch .getRoi().height / sca;
+  // roi.width = patch.getRoi().width / sca;
+  // roi.height = patch .getRoi().height / sca;
 
-  roi.x = patch.getRoi().x - roi.width / 2;
-  roi.y = patch.getRoi().y - roi.height / 2;
+  // roi.x = patch.getRoi().x - roi.width / 2;
+  // roi.y = patch.getRoi().y - roi.height / 2;
 
-  if(roi.x < 0) roi.x = 0;
-  if(roi.y < 0) roi.y = 0;
-  if(roi.x + roi.width > patch.getDepth()->cols) roi.width = patch.getDepth()->cols - roi.x;
-  if(roi.y + roi.height > patch.getDepth()->rows) roi.height = patch.getDepth()->rows - roi.y;
+  // if(roi.x < 0) roi.x = 0;
+  // if(roi.y < 0) roi.y = 0;
+  // if(roi.x + roi.width > patch.getDepth()->cols) roi.width = patch.getDepth()->cols - roi.x;
+  // if(roi.y + roi.height > patch.getDepth()->rows) roi.height = patch.getDepth()->rows - roi.y;
 
-  patch.setRoi(roi);
+  // patch.setRoi(roi);
 
-  return 0;
+  // return 0;
 }
 
 int normarizationCenterPointP(CPosPatch &patch, const CConfig &config, double cd){//, const CConfig &config)const {
