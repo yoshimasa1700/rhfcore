@@ -268,13 +268,13 @@ void extractPosPatches(std::vector<CPosDataset*> &posSet,
 	tempRect.x = j;
 	tempRect.y = k;
 
-<<<<<<< HEAD
+        //<<<<<<< HEAD
         // std::cout << l << " " << j << " " << k << std::endl;
         
-=======
+        //=======
         //        std::cout << j << " " << k << " " << l << std::endl;
 
->>>>>>> origin/master
+        //>>>>>>> origin/master
 	// set patch class
 	classNum = classDatabase.search(posSet.at(l)->getParam()->getClassName());//dataSet.at(l).className.at(0));
 	if(classNum == -1){
@@ -719,7 +719,7 @@ int normarizationByDepth(CPatch &patch, const CConfig &config, double cd){//, co
   cv::Rect tempRect = patch.getRoi();
   cv::Mat realFeature = tempFeature(patch.getRoi());
 
-<<<<<<< HEAD
+  //<<<<<<< HEAD
   // double a = realFeature.at<double>(0,0) + realFeature.at<double>(tempRect.height,tempRect.width) - realFeature.at<double>(0,tempRect.width) - realFeature.at<double>(tempRect.height, 0);
   cv::Mat tempDepth = *patch.getDepth();
   cv::Mat realDepth = tempDepth(patch.getRoi());
@@ -728,11 +728,11 @@ int normarizationByDepth(CPatch &patch, const CConfig &config, double cd){//, co
   
   //a /= tempRect.height;
   //  a /= tempRect.width;
-=======
-  double a = realFeature.at<double>(0,0) + realFeature.at<double>(tempRect.height,tempRect.width) - realFeature.at<double>(0,tempRect.width) - realFeature.at<double>(tempRect.height, 0);
-  a /= tempRect.height;
-  a /= tempRect.width;
->>>>>>> origin/master
+// =======
+//   double a = realFeature.at<double>(0,0) + realFeature.at<double>(tempRect.height,tempRect.width) - realFeature.at<double>(0,tempRect.width) - realFeature.at<double>(tempRect.height, 0);
+//   a /= tempRect.height;
+//   a /= tempRect.width;
+// >>>>>>> origin/master
   
   cv::Rect roi;
   double sca = 1 - (500.0 - a) / 500.0;
