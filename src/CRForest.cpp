@@ -69,7 +69,16 @@ void CRForest::growATree(const int treeNum){
   for(unsigned int i = 0; i < posSet.size(); ++i){
     posSet[i]->loadImage(conf);
     posSet[i]->extractFeatures(conf);
-    classDatabase.add(posSet[i]->getParam()->getClassName(),posSet[i]->img[0]->size(),0);
+
+    cv::Size tempSize = posSet[i]->img[0]->size();
+    
+    if(conf.learningMode != 2){
+      double tempDepth = posSet[i]->img[1]->at<ushort>(tempSize.width/2,tempSize.height/2);
+      tempSize.width *= tempDepth;
+      tempSize.height *= tempDepth;
+      
+    }
+    classDatabase.add(posSet[i]->getParam()->getClassName(),tempSize,0);
     pBar(i,posSet.size(),50);
   }
   std::cout << std::endl;
@@ -249,16 +258,16 @@ CDetectionResult CRForest::detection(CTestDataset &testSet) const{
 	      	cv::Rect tempRect = testPatch[j].getRoi();
 	      	cv::Mat realDepth = tempDepth(tempRect);
 
-                cv::Mat tempFeature = *testPatch[j].getFeature(4);
-                cv::Mat realFeature = tempFeature(tempRect);
+                // cv::Mat tempFeature = *testPatch[j].getFeature(4);
+                // cv::Mat realFeature = tempFeature(tempRect);
 
-                double a = realFeature.at<double>(0,0) + realFeature.at<double>(tempRect.height,tempRect.width) - realFeature.at<double>(0,tempRect.width) - realFeature.at<double>(tempRect.height, 0);
-                a /= tempRect.height;
-                a /= tempRect.width;
+                // double a = realFeature.at<double>(0,0) + realFeature.at<double>(tempRect.height,tempRect.width) - realFeature.at<double>(0,tempRect.width) - realFeature.at<double>(tempRect.height, 0);
+                // a /= tempRect.height;
+                // a /= tempRect.width;
                 
 	      	centerDepth = realDepth.at<ushort>(tempRect.height / 2 + 1, tempRect.width / 2 + 1) + conf.mindist;
 
-		double sca = a;//centerDepth;
+		double sca = centerDepth;
 
                 //                std::cout << rPoint << std::endl;
                 
@@ -434,25 +443,36 @@ CDetectionResult CRForest::detection(CTestDataset &testSet) const{
     // if you whant add condition of detection threshold, add here
     cv::Size tempSize = classDatabase.vNode[c].classSize;
     cv::Rect_<int> outRect(maxLoc.x - tempSize.width / 2,maxLoc.y - tempSize.height / 2 , tempSize.width,tempSize.height);
-    cv::rectangle(outputImage[c],outRect,cv::Scalar(0,0,200),3);
-    cv::putText(outputImage[c],classDatabase.vNode[c].name,cv::Point(outRect.x,outRect.y),cv::FONT_HERSHEY_SIMPLEX,1.2, cv::Scalar(0,0,200), 2, CV_AA);
 
-    cv::circle(outputImage[0], maxLoc, 10, cv::Scalar(200,0,0));
-    cv::putText(outputImage[0],classDatabase.vNode[c].name,maxLoc,cv::FONT_HERSHEY_SIMPLEX,1.2, cv::Scalar(200,0,0), 2, CV_AA);
+
+    if(conf.learningMode != 2){
+      cv::Mat tempDepth = *testSet.img[1]; 
+          std::cout << "kokomade" << std::endl;
+      double centerDepth = tempDepth.at<double>(maxLoc);
+      outRect.height /=  centerDepth;
+      outRect.width /= centerDepth;
+
+      std::cout << outRect << std::endl;
+    }
+    // cv::rectangle(outputImage[c],outRect,cv::Scalar(0,0,200),3);
+    // cv::putText(outputImage[c],classDatabase.vNode[c].name,cv::Point(outRect.x,outRect.y),cv::FONT_HERSHEY_SIMPLEX,1.2, cv::Scalar(0,0,200), 2, CV_AA);
+
+    // cv::circle(outputImage[0], maxLoc, 10, cv::Scalar(200,0,0));
+    // cv::putText(outputImage[0],classDatabase.vNode[c].name,maxLoc,cv::FONT_HERSHEY_SIMPLEX,1.2, cv::Scalar(200,0,0), 2, CV_AA);
 
     // draw grand truth to result image
-    if(!conf.demoMode){
-      for(unsigned int i = 0; i < testSet.param.size(); ++i){
-	int tempClassNum = classDatabase.search(testSet.param[i].getClassName());
-	if(tempClassNum != -1){
-	  cv::Size tempSize = classDatabase.vNode[tempClassNum].classSize;
-	  cv::Rect_<int> outRect(testSet.param[i].getCenterPoint().x - tempSize.width / 2,testSet.param[i].getCenterPoint().y - tempSize.height / 2 , tempSize.width,tempSize.height);
-	  //cv::rectangle(outputImage[0],outRect,cv::Scalar(200,0,0),3);
-	  cv::circle(outputImage[0], maxLoc, 20, cv::Scalar(200,0,0));
-	  cv::putText(outputImage[0],classDatabase.vNode[c].name,maxLoc,cv::FONT_HERSHEY_SIMPLEX,1.2, cv::Scalar(200,0,0), 2, CV_AA);
-	}
-      }
-    }
+    // if(!conf.demoMode){
+    //   for(unsigned int i = 0; i < testSet.param.size(); ++i){
+    //     int tempClassNum = classDatabase.search(testSet.param[i].getClassName());
+    //     if(tempClassNum != -1){
+    //       cv::Size tempSize = classDatabase.vNode[tempClassNum].classSize;
+    //       cv::Rect_<int> outRect(testSet.param[i].getCenterPoint().x - tempSize.width / 2,testSet.param[i].getCenterPoint().y - tempSize.height / 2 , tempSize.width,tempSize.height);
+    //       //cv::rectangle(outputImage[0],outRect,cv::Scalar(200,0,0),3);
+    //       cv::circle(outputImage[0], maxLoc, 20, cv::Scalar(200,0,0));
+    //       cv::putText(outputImage[0],classDatabase.vNode[c].name,maxLoc,cv::FONT_HERSHEY_SIMPLEX,1.2, cv::Scalar(200,0,0), 2, CV_AA);
+    //     }
+    //   }
+    // }
 
 
 
@@ -502,6 +522,7 @@ CDetectionResult CRForest::detection(CTestDataset &testSet) const{
     detectedClass.nearestClass = nearestObject;
     detectedClass.score = voteImage[c].at<float>(maxLoc.y, maxLoc.x);
     detectedClass.centerPoint = maxLoc;
+    detectedClass.bbox = outRect;
     detectResult.detectedClass.push_back(detectedClass);
   } // for every class
 

@@ -111,11 +111,21 @@ void loadTrainPosFile(CConfig conf, std::vector<CPosDataset*> &posSet)
 
 	// read image size
 	cv::Mat tempImage = cv::imread(posTemp->getRgbImagePath(),3);
+        
 	cv::Size tempSize = cv::Size(tempImage.cols, tempImage.rows);
 
 	// set center point
 	tempPoint = cv::Point(tempImage.cols / 2, tempImage.rows / 2);
 	posTemp->setCenterPoint(tempPoint);
+
+        if(conf.learningMode != 2){
+          cv::Mat tempDepth = cv::imread(posTemp->getDepthImagePath(), CV_LOAD_IMAGE_ANYDEPTH);
+          double centerDepth =  tempDepth.at<ushort>(tempPoint);
+          tempSize.height *= (int)centerDepth;
+          tempSize.width *= (int)centerDepth;
+
+          //          std::cout << tempSize;
+        }
 
 	// registre class param to class database
 	database.add(posTemp->getParam()->getClassName(), tempSize, 0);
@@ -755,13 +765,18 @@ int normarizationByDepth(CPatch &patch, const CConfig &config, double cd){//, co
 
 int normarizationCenterPointP(CPosPatch &patch, const CConfig &config, double cd){//, const CConfig &config)const {
 
-  cv::Mat tempFeature = *patch.getFeature(4);
-  cv::Rect tempRect = patch.getRoi();
-  cv::Mat realFeature = tempFeature(patch.getRoi());
+  // cv::Mat tempFeature = *patch.getFeature(4);
+  // cv::Rect tempRect = patch.getRoi();
+  // cv::Mat realFeature = tempFeature(patch.getRoi());
 
-  double a = realFeature.at<double>(0,0) + realFeature.at<double>(tempRect.height,tempRect.width) - realFeature.at<double>(0,tempRect.width) - realFeature.at<double>(tempRect.height, 0);
-  a /= tempRect.height;
-  a /= tempRect.width;
+  cv::Mat tempDepth = *patch.getDepth();
+  cv::Mat realDepth = tempDepth(patch.getRoi());
+
+  double a = realDepth.at<ushort>(config.p_height / 2 , config.p_width / 2 );
+
+  // double a = realFeature.at<double>(0,0) + realFeature.at<double>(tempRect.height,tempRect.width) - realFeature.at<double>(0,tempRect.width) - realFeature.at<double>(tempRect.height, 0);
+  // a /= tempRect.height;
+  // a /= tempRect.width;
   
   double sca = a;
   
