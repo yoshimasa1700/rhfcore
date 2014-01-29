@@ -278,13 +278,6 @@ void extractPosPatches(std::vector<CPosDataset*> &posSet,
 	tempRect.x = j;
 	tempRect.y = k;
 
-        //<<<<<<< HEAD
-        // std::cout << l << " " << j << " " << k << std::endl;
-        
-        //=======
-        //        std::cout << j << " " << k << " " << l << std::endl;
-
-        //>>>>>>> origin/master
 	// set patch class
 	classNum = classDatabase.search(posSet.at(l)->getParam()->getClassName());//dataSet.at(l).className.at(0));
 	if(classNum == -1){
@@ -304,34 +297,21 @@ void extractPosPatches(std::vector<CPosDataset*> &posSet,
 	  cv::Mat tempDepth1 = *posTemp.getDepth();
 	  cv::Mat tempDepth2 = tempDepth1(tempRect);
 
-	  // if()
-	  //   centerDepthFlag = 1;
-	  //std::cout << tempDepth2.at<ushort>(conf.p_height / 2 + 1, conf.p_width / 2 + 1) << std::endl;
-	
-	// cv::namedWindow("test2");
-          // depth->convertTo(showDepth, CV_8U, 255.0/1000);
-          // cv::imshow("test2", showDepth);
-          // cv::waitKey(0);
-
-          // cv::Mat showDepth;
-          // cv::namedWindow("test2");
-          // tempDepth2.convertTo(showDepth, CV_8U, 255.0/1000);
-          // cv::imshow("test2", showDepth);
-          // cv::waitKey(0);
-          // std::cout << tempDepth2.at<ushort>(conf.p_height / 2 + 1, conf.p_width / 2 + 1) << std::endl;
-          
-	  //	std::cout << centerDepthFlag << std::endl;
-
-	  //if (conf.learningMode == 2){// || pixNum > 0){
-
-	  //std::cout << tempDepth2.at<ushort>(conf.p_height / 2 + 1, conf.p_width / 2 + 1) << std::endl;
 	  if(tempDepth2.at<ushort>(conf.p_height / 2 + 1, conf.p_width / 2 + 1) != 0
-             && tempDepth2.at<ushort>(conf.p_height / 2 + 1, conf.p_width / 2 + 1 < 1000)){
+             && tempDepth2.at<ushort>(conf.p_height / 2 + 1, conf.p_width / 2 + 1) < 950
+             && tempDepth2.at<ushort>(conf.p_height / 2 + 1, conf.p_width / 2 + 1) > 50){
 	    //	  std::cout << "test" << std::endl;
 	    //if(conf.learningMode != 2){
 	    //	    std::cout << (double)tempDepth2.at<ushort>(conf.p_height / 2 + 1, conf.p_width / 2 + 1) << std::endl;
             normarizationByDepth(posTemp , conf, (double)tempDepth2.at<ushort>(conf.p_height / 2 + 1, conf.p_width / 2 + 1));
 	    normarizationCenterPointP(posTemp, conf,(double)tempDepth2.at<ushort>(conf.p_height / 2 + 1, conf.p_width / 2 + 1));
+
+
+            
+            if(posTemp.getRoi().width < 10 || posTemp.getRoi().height < 10){
+              centerDepthFlag = 0;
+              //              std::cout << posTemp.getRoi() << std::endl;
+            }
 	    //}
 
 	    //	    std::cout << posTemp.getRoi() << std::endl;
@@ -344,7 +324,7 @@ void extractPosPatches(std::vector<CPosDataset*> &posSet,
             //            std::cout << "zero deshi ta" << std::endl;
           }
 	}
-	if(/*posTemp.getRoi().width > 5 && posTemp.getRoi().height > 5 &&*/ centerDepthFlag){
+	if(posTemp.getRoi().width > 10 && posTemp.getRoi().height > 10 &&centerDepthFlag == 1){
 	  std::vector<double> pRatio(0);
           //          pRatio.push_back(0.5);
 	  pRatio.push_back(1.0);
@@ -357,51 +337,39 @@ void extractPosPatches(std::vector<CPosDataset*> &posSet,
           // // }
 	  // pRatio.push_back(3.5);
           // pRatio.push_back(4.0);
-	  // //	  pRatio.push_back(3.8);
-	  // pRatio.push_back(4.2);
-	  // //	  pRatio.push_back(4.6);
-	  // pRatio.push_back(5.0);
-
-	  // pRatio.push_back(1.0);
-	  // // pRatio.push_back(1.2);
-	  // pRatio.push_back(1.4);
-	  // // pRatio.push_back(1.6);
-	  // pRatio.push_back(1.8);
-	  // //	  pRatio.push_back(1.5);
-	  //   pRatio.push_back(2.0);
 
 	  for(unsigned int r = 0; r < pRatio.size(); ++r){
 	    CPosPatch transPatch = posTemp;  // copy constructor
 	    cv::Rect tempRoi = transPatch.getRoi();
 	    
-	    if(tempRoi.x - (int)((double)tempRoi.width * (pRatio[r] - 1.0) / 2.0)> 0)
-	      tempRoi.x -= (int)((double)tempRoi.width * (pRatio[r] - 1.0) / 2.0);
-	    else
-	      tempRoi.x = 0;
+	    // if(tempRoi.x - (int)((double)tempRoi.width * (pRatio[r] - 1.0) / 2.0)> 0)
+	    //   tempRoi.x -= (int)((double)tempRoi.width * (pRatio[r] - 1.0) / 2.0);
+	    // else
+	    //   tempRoi.x = 0;
 
-	    if(tempRoi.y - (int)((double)tempRoi.height * (pRatio[r] - 1.0) / 2.0)> 0)
-	      tempRoi.y -= (int)((double)tempRoi.height * (pRatio[r] - 1.0) / 2.0);
-	    else
-	      tempRoi.y = 0;
+	    // if(tempRoi.y - (int)((double)tempRoi.height * (pRatio[r] - 1.0) / 2.0)> 0)
+	    //   tempRoi.y -= (int)((double)tempRoi.height * (pRatio[r] - 1.0) / 2.0);
+	    // else
+	    //   tempRoi.y = 0;
 
-	    if(tempRoi.width * pRatio[r] + tempRoi.x < posSet.at(l)->img.at(0)->cols)
-	      tempRoi.width *= pRatio[r];
-	    else
-	      tempRoi.width = posSet.at(l)->img.at(0)->cols - tempRoi.x;
+	    // if(tempRoi.width * pRatio[r] + tempRoi.x < posSet.at(l)->img.at(0)->cols)
+	    //   tempRoi.width *= pRatio[r];
+	    // else
+	    //   tempRoi.width = posSet.at(l)->img.at(0)->cols - tempRoi.x;
 
-	    if(tempRoi.height * pRatio[r] + tempRoi.y < posSet.at(l)->img.at(0)->rows)
-	      tempRoi.height *= pRatio[r];
-	    else
-	      tempRoi.height = posSet.at(l)->img.at(0)->rows - tempRoi.y;
+	    // if(tempRoi.height * pRatio[r] + tempRoi.y < posSet.at(l)->img.at(0)->rows)
+	    //   tempRoi.height *= pRatio[r];
+	    // else
+	    //   tempRoi.height = posSet.at(l)->img.at(0)->rows - tempRoi.y;
 
-	    transPatch.setRoi(tempRoi);
-            //            std::cout << "haitte masu" << std::endl;
-	    cv::Point_<double> tempRP = transPatch.getRelativePosition();
-            //            std::cout << tempRP << std::endl;
-	    tempRP.x /= pRatio[r];
-	    tempRP.y /= pRatio[r];
+	    // transPatch.setRoi(tempRoi);
+            // //            std::cout << "haitte masu" << std::endl;
+	    // cv::Point_<double> tempRP = transPatch.getRelativePosition();
+            // //            std::cout << tempRP << std::endl;
+	    // tempRP.x /= pRatio[r];
+	    // tempRP.y /= pRatio[r];
 
-	    transPatch.setRelativePosition(tempRP);
+	    // transPatch.setRelativePosition(tempRP);
 
 	    // tPosPatch.push_back(posTemp);
 	    // patchPerClass.at(classNum).push_back(posTemp);
@@ -412,7 +380,7 @@ void extractPosPatches(std::vector<CPosDataset*> &posSet,
 
 	      for(int m = 0; m < tempRoi.width; ++m){
 		for(int n = 0; n < tempRoi.height; ++n){
-		  if((*transPatch.getDepth())(tempRoi).at<ushort>(n,m) == 0)
+		  if((*posTemp.getDepth())(posTemp.getRoi()).at<ushort>(n,m) == 0)
 		    totalZeroPoint += 1;
 		  totalPoint += 1;
 		}
@@ -422,8 +390,10 @@ void extractPosPatches(std::vector<CPosDataset*> &posSet,
 	    //	    std::cout << totalZeroPoint << " " << totalPoint << std::endl;
 
 	    if( (double)totalZeroPoint < (double)totalPoint * 0.3 || conf.learningMode == 2){
-	      tPosPatch.push_back(transPatch);
-	      patchPerClass.at(classNum).push_back(transPatch);
+              if(posTemp.getRoi().width > 10 && posTemp.getRoi().height > 10){
+                tPosPatch.push_back(posTemp);
+                patchPerClass.at(classNum).push_back(posTemp);
+              }
 	    }
 	  }
 	}
@@ -522,7 +492,7 @@ void extractNegPatches(std::vector<CNegDataset*> &negSet,
 	  }
 	}
 
-	if(negTemp.getRoi().width > 5 && negTemp.getRoi().height > 5)
+	if(negTemp.getRoi().width > 10 && negTemp.getRoi().height > 10)
 	  tNegPatch.push_back(negTemp);
 	//}
       }//x
@@ -583,8 +553,8 @@ void extractTestPatches(CTestDataset* testSet,std::vector<CTestPatch> &testPatch
 	cv::Mat tempDepth1 = *testTemp.getDepth();
 	cv::Mat tempDepth2 = tempDepth1(tempRect);
 
-	if(tempDepth2.at<ushort>(conf.p_height / 2 + 1, conf.p_width / 2 + 1) == 0 ||
-	   tempDepth2.at<ushort>(conf.p_height / 2 + 1, conf.p_width / 2 + 1) == 1024){
+	if(tempDepth2.at<ushort>(conf.p_height / 2 + 1, conf.p_width / 2 + 1) < 50 ||
+	   tempDepth2.at<ushort>(conf.p_height / 2 + 1, conf.p_width / 2 + 1) > 950){
 	  centerDepthFlag = 0;
 	  
 	}else
@@ -609,7 +579,7 @@ void extractTestPatches(CTestDataset* testSet,std::vector<CTestPatch> &testPatch
         totalZeroPoint = totalPoint;
 
 
-      if(testTemp.getRoi().width > 5 && testTemp.getRoi().height > 5 && centerDepthFlag == 1){
+      if(testTemp.getRoi().width > 10 && testTemp.getRoi().height > 10 && centerDepthFlag == 1){
         if(conf.learningMode == 2 || (double)totalZeroPoint < (double)totalPoint * 0.3){
           testPatch.push_back(testTemp);
           //          std::cout << testTemp.getRoi() << std::endl;
@@ -725,12 +695,14 @@ int normarizationByDepth(CPatch &patch, const CConfig &config, double cd){//, co
   }
 
 
-  cv::Mat tempFeature = *patch.getFeature(4);
-  cv::Rect tempRect = patch.getRoi();
-  cv::Mat realFeature = tempFeature(patch.getRoi());
+  // cv::Mat tempFeature = *patch.getFeature(4);
+  // cv::Rect tempRect = patch.getRoi();
+  // cv::Mat realFeature = tempFeature(patch.getRoi());
 
-  //<<<<<<< HEAD
-  // double a = realFeature.at<double>(0,0) + realFeature.at<double>(tempRect.height,tempRect.width) - realFeature.at<double>(0,tempRect.width) - realFeature.at<double>(tempRect.height, 0);
+  // double a = realFeature.at<double>(0,0)
+  //     + realFeature.at<double>(tempRect.height,tempRect.width)
+  //     - realFeature.at<double>(0,tempRect.width)
+  //     - realFeature.at<double>(tempRect.height, 0);
   cv::Mat tempDepth = *patch.getDepth();
   cv::Mat realDepth = tempDepth(patch.getRoi());
 
@@ -739,19 +711,23 @@ int normarizationByDepth(CPatch &patch, const CConfig &config, double cd){//, co
   //a /= tempRect.height;
   //  a /= tempRect.width;
 // =======
-//   double a = realFeature.at<double>(0,0) + realFeature.at<double>(tempRect.height,tempRect.width) - realFeature.at<double>(0,tempRect.width) - realFeature.at<double>(tempRect.height, 0);
+//   double a = realFeature.at<ushort>(0,0) + realFeature.at<ushort>(tempRect.height,tempRect.width) - realFeature.at<ushort>(0,tempRect.width) - realFeature.at<ushort>(tempRect.height, 0);
 //   a /= tempRect.height;
 //   a /= tempRect.width;
 // >>>>>>> origin/master
   
   cv::Rect roi;
-  double sca = 1 - (500.0 - a) / 500.0;
+  double sca = a / 512.0;
 
   roi.width = patch.getRoi().width / sca;
   roi.height = patch .getRoi().height / sca;
 
-  roi.x = patch.getRoi().x - roi.width / 2;
-  roi.y = patch.getRoi().y - roi.height / 2;
+  roi.x = patch.getRoi().x - roi.width / 2 + patch.getRoi().width / 2;
+  roi.y = patch.getRoi().y - roi.height / 2  + patch.getRoi().height / 2;
+
+  // std::cout << a << std::endl;
+  // std::cout << roi << std::endl;
+
 
   if(roi.x < 0) roi.x = 0;
   if(roi.y < 0) roi.y = 0;

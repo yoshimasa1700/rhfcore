@@ -153,6 +153,8 @@ void calcHaarLikeFeature(const cv::Mat &patch,
     std::cout << "error! can't get enough space for haar-like feature" << std::endl;
     std::cout << s1 << " " << s2 << std::endl;
 
+    std::cout << patch.size() << std::endl;
+    std::cout << patch << std::endl;
     for(int i = 0; i < 8; ++i)
       std::cout << test[i] << " ";
     std::cout << std::endl;

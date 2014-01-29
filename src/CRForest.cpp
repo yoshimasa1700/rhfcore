@@ -73,7 +73,15 @@ void CRForest::growATree(const int treeNum){
     cv::Size tempSize = posSet[i]->img[0]->size();
     
     if(conf.learningMode != 2){
-      double tempDepth = posSet[i]->img[1]->at<ushort>(tempSize.width/2,tempSize.height/2);
+
+      // double a = posSet[i]->feature[4]->at<double>(tempSize.height/2 - 25, tempSize.width/2 -25)
+      //     + posSet[i]->feature[4]->at<double>(tempSize.height/2 + 25, tempSize.width/2 + 25)
+      //     - posSet[i]->feature[4]->at<double>(tempSize.height/2 - 25, tempSize.width/2 + 25)
+      //     - posSet[i]->feature[4]->at<double>(tempSize.height/2 + 25, tempSize.width/2 - 25);
+
+      // a /= 2500;
+      
+      double tempDepth = posSet[i]->img[1]->at<ushort>(tempSize.height/2,tempSize.width/2);
       tempSize.width *= tempDepth;
       tempSize.height *= tempDepth;
       
@@ -285,7 +293,10 @@ CDetectionResult CRForest::detection(CTestDataset &testSet) const{
 
               //              std::cout <<testPatch[j].getRoi() << std::endl;
 	      cv::Point pos(testPatch[j].getRoi().x + testPatch[j].getRoi().width / 2 +  rPoint.x ,
-			    testPatch[j].getRoi().y  + testPatch[j].getRoi().height / 2 + rPoint.y);
+	        	    testPatch[j].getRoi().y  + testPatch[j].getRoi().height / 2 + rPoint.y);
+
+              // cv::Point pos(testPatch[j].getRoi().x  +  rPoint.x ,
+	      //   	    testPatch[j].getRoi().y  + rPoint.y);
 
 	      // vote to result image
 	      if(pos.x > 0 && pos.y > 0 && pos.x < voteImage[cl].cols && pos.y < voteImage[cl].rows){
@@ -414,12 +425,13 @@ CDetectionResult CRForest::detection(CTestDataset &testSet) const{
              maxLoc.x + x > 0 &&
              maxLoc.y + y > 0){
             boost::shared_ptr<paramBin> pBin = paramVote[c][maxLoc.y + y][maxLoc.x +x];
-            while(pBin){
+            int pp = 10;
+            while(pBin && pp > 0){
               //              std::cout << pBin->roll << " " << pBin->pitch << " " << pBin->yaw << std::endl;
               voteAngle.row(0) += calcGaussian(pBin->confidence, pBin->roll);//at<>[0][pBin->roll] 
               voteAngle.row(1) += calcGaussian(pBin->confidence, pBin->pitch);//at<>[0][pBin->roll] 
               voteAngle.row(2) += calcGaussian(pBin->confidence, pBin->yaw);//at<>[0][pBin->roll]
-
+              pp --;
               pBin = pBin->next;
             }
           }
@@ -442,18 +454,24 @@ CDetectionResult CRForest::detection(CTestDataset &testSet) const{
     // draw detected class bounding box to result image
     // if you whant add condition of detection threshold, add here
     cv::Size tempSize = classDatabase.vNode[c].classSize;
-    cv::Rect_<int> outRect(maxLoc.x - tempSize.width / 2,maxLoc.y - tempSize.height / 2 , tempSize.width,tempSize.height);
-
 
     if(conf.learningMode != 2){
       cv::Mat tempDepth = *testSet.img[1]; 
-          std::cout << "kokomade" << std::endl;
-      double centerDepth = tempDepth.at<double>(maxLoc);
-      outRect.height /=  centerDepth;
-      outRect.width /= centerDepth;
+      double centerDepth = tempDepth.at<ushort>(maxLoc);
 
-      std::cout << outRect << std::endl;
+      //      std::cout << tempSize << std::endl;
+      //      std::cout << centerDepth << std::endl;
+      if(centerDepth != 0){
+        tempSize.height /=  (int)centerDepth;
+        tempSize.width /= (int)centerDepth;
+      }
+      //      std::cout << tempSize << std::endl;
     }
+    
+    cv::Rect_<int> outRect(maxLoc.x - tempSize.width / 2,maxLoc.y - tempSize.height / 2 , tempSize.width,tempSize.height);
+
+
+
     // cv::rectangle(outputImage[c],outRect,cv::Scalar(0,0,200),3);
     // cv::putText(outputImage[c],classDatabase.vNode[c].name,cv::Point(outRect.x,outRect.y),cv::FONT_HERSHEY_SIMPLEX,1.2, cv::Scalar(0,0,200), 2, CV_AA);
 
