@@ -281,7 +281,7 @@ CDetectionResult CRForest::detection(CTestDataset &testSet) const{
 	      // vote to result image
 	      if(pos.x > 0 && pos.y > 0 && pos.x < voteImage[cl].cols && pos.y < voteImage[cl].rows){
                 cv::Size classsize = classDatabase.vNode[cl].classSize;
-		double v = result[m]->pfg[cl] / result.at(m)->param.at(l).size() / conf.ntrees * conf.stride * conf.stride / classsize.width / classsize.height * 10000;// / ( result.size() * result.at(m)->param.at(l).size());// / (euclideanDist(cv::Point(), rPoint) + 1);
+		double v = result[m]->pfg[cl];// / result.at(m)->param.at(l).size() / conf.ntrees * conf.stride * conf.stride / classsize.width / classsize.height * 10000;// / ( result.size() * result.at(m)->param.at(l).size());// / (euclideanDist(cv::Point(), rPoint) + 1);
 
                 // if(conf.learningMode != 2)
                 //   v *= centerDepth;
