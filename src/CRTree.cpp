@@ -171,7 +171,8 @@ CRTree::CRTree(const char* filename,
 
           CParamset tempParam;
           //tempParam.setClassName(tempClassName);
-          tempParam.setCenterPoint(tempPoint);
+          //tempParam.setCenterPoint(tempPoint);
+          tempParam.setRelativePoint(tempPoint);
           tempParam.setAngle(tempAngle);
           tempParam.setClassName(tempCName);
 

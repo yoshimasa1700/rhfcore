@@ -13,58 +13,6 @@ float calcSumOfDepth(cv::Mat &depth, const CConfig &conf){
   return integralMat.at<int>(depth.rows, depth.cols);
 }
 
-// void loadTrainObjFile(CConfig conf, std::vector<CPosDataset*> &posSet)
-// {
-//   std::vector<std::string> modelPath(0);
-//   std::vector<std::string> modelName(0);
-//   std::string trainModelListPath = conf.modelListFolder + PATH_SEP + conf.modelListName;
-
-//   boost::uniform_real<> dst(0, 360);
-//   boost::variate_generator<boost::lagged_fibonacci1279&,
-// 			   boost::uniform_real<> > rand(genPose, dst);
-
-//   posSet.clear();
-
-//   std::ifstream modelList(trainModelListPath.c_str());
-//   if(!modelList.is_open()){
-//     std::cout << "train model list is not found!" << std::endl;
-//     exit(-1);
-//   }
-
-//   int modelNum = 0;
-//   modelList >> modelNum;
-//   modelPath.resize(modelNum);
-//   modelName.resize(modelNum);
-
-//   for(int i = 0; i < modelNum; ++i){
-//     std::string tempName;
-//     modelList >> tempName;
-//     modelPath[i] = conf.modelListFolder +PATH_SEP + tempName;
-//     std::string tempClass;
-//     modelList >> tempClass;
-//     modelName[i] = tempClass;
-//   }
-
-//   posSet.resize(modelNum * conf.imagePerTree);
-    
-//   //    std::cout << modelNum << std::endl;
-//   for(int j = 0; j < modelNum; ++j){
-//     for(int i = 0; i < conf.imagePerTree; ++i){
-//       CPosDataset* posTemp = new CPosDataset();
-//       posTemp->setModelPath(modelPath.at(j));
-//       posTemp->setClassName(modelName.at(j));
-//       double tempAngle[3];
-//       for(int k = 0; k < 3; ++k)
-// 	tempAngle[k] = rand();
-//       posTemp->setAngle(tempAngle);
-//       posTemp->setCenterPoint(cv::Point(320,240));
-
-//       posSet[j * conf.imagePerTree + i] = posTemp;
-//     }
-//   }
-//   modelList.close();
-// }
-
 void loadTrainPosFile(CConfig conf, std::vector<CPosDataset*> &posSet)
 {
   std::string traindatafilepath = conf.trainpath + PATH_SEP +  conf.traindatafile;
@@ -305,28 +253,11 @@ void extractPosPatches(std::vector<CPosDataset*> &posSet,
   int classNum = 0;
   cv::Mat roi;
 
-  // cv::Mat showDepth = cv::Mat(posSet[0]->img[1]->rows, posSet[0]->img[1]->cols, CV_8U);
-  // posSet[0]->img[1]->convertTo(showDepth, CV_8U, 255.0/1000.0);
-    
-  // cv::namedWindow("test");
-  //    cv::imshow("test", *posSet[0]->img[0]);
-  //    cv::namedWindow("test2");
-  //    cv::imshow("test2", showDepth);
-
-  //    cv::waitKey(0);
-
-  //    cv::destroyWindow("test");
-  //    cv::destroyWindow("test2");
-
-
-  //    std::cout << posSet[1]->img[1]->type() << " " << CV_16U << std::endl;
-
   posPatch.clear();
 
   tempRect.width  = conf.p_width;
   tempRect.height = conf.p_height;
   
-
   std::cout << "image num is " << posSet.size() << std::endl;;
 
   std::cout << "extracting pos patch from image" << std::endl;
@@ -337,6 +268,8 @@ void extractPosPatches(std::vector<CPosDataset*> &posSet,
 	tempRect.x = j;
 	tempRect.y = k;
 
+        // std::cout << l << " " << j << " " << k << std::endl;
+        
 	// set patch class
 	classNum = classDatabase.search(posSet.at(l)->getParam()->getClassName());//dataSet.at(l).className.at(0));
 	if(classNum == -1){
@@ -401,13 +334,14 @@ void extractPosPatches(std::vector<CPosDataset*> &posSet,
           //          pRatio.push_back(0.5);
 	  pRatio.push_back(1.0);
 	  //pRatio.push_back(1.4);
-          //        	  pRatio.push_back(1.5);
-          // if(conf.learningMode == 2){
-          //   pRatio.push_back(2.0);
-          //   //            pRatio.push_back(2.5);
-          //   pRatio.push_back(3.0);
-          // }
-	  // pRatio.push_back(3.4);
+          // pRatio.push_back(1.5);
+          // // if(conf.learningMode == 2){
+          // pRatio.push_back(2.0);
+          // pRatio.push_back(2.5);
+          // pRatio.push_back(3.0);
+          // // }
+	  // pRatio.push_back(3.5);
+          // pRatio.push_back(4.0);
 	  // //	  pRatio.push_back(3.8);
 	  // pRatio.push_back(4.2);
 	  // //	  pRatio.push_back(4.6);
@@ -772,10 +706,10 @@ int CClassDatabase::search(std::string str) const{
 
 int normarizationByDepth(CPatch &patch, const CConfig &config, double cd){//, const CConfig &config)const {
 
-  // if(cd == 0){
-  //   std::cerr << "error! depth is 0, something wrong" << std::endl;
-  //   exit(-1);
-  // }
+  if(cd == 0){
+    std::cerr << "error! depth is 0, something wrong" << std::endl;
+    exit(-1);
+  }
 
 
   // cv::Mat tempFeature = *patch.getFeature(4);
@@ -783,31 +717,34 @@ int normarizationByDepth(CPatch &patch, const CConfig &config, double cd){//, co
   // cv::Mat realFeature = tempFeature(patch.getRoi());
 
   // double a = realFeature.at<double>(0,0) + realFeature.at<double>(tempRect.height,tempRect.width) - realFeature.at<double>(0,tempRect.width) - realFeature.at<double>(tempRect.height, 0);
-  // a /= tempRect.height;
-  // a /= tempRect.width;
+  cv::Mat tempDepth = *patch.getDepth();
+  cv::Mat realDepth = tempDepth(patch.getRoi());
+
+  double a = realDepth.at<ushort>(config.p_height / 2 , config.p_width / 2 );
   
-  // cv::Rect roi;
-  // double sca = 1 - (500.0 - a) / 500.0;
+  //a /= tempRect.height;
+  //  a /= tempRect.width;
+  
+  cv::Rect roi;
+  double sca = 1 - (500.0 - a) / 500.0;
 
-  // roi.width = patch.getRoi().width / sca;
-  // roi.height = patch .getRoi().height / sca;
+  roi.width = patch.getRoi().width / sca;
+  roi.height = patch .getRoi().height / sca;
 
-  // roi.x = patch.getRoi().x - roi.width / 2;
-  // roi.y = patch.getRoi().y - roi.height / 2;
+  roi.x = patch.getRoi().x - roi.width / 2;
+  roi.y = patch.getRoi().y - roi.height / 2;
 
-  // if(roi.x < 0) roi.x = 0;
-  // if(roi.y < 0) roi.y = 0;
-  // if(roi.x + roi.width > patch.getDepth()->cols) roi.width = patch.getDepth()->cols - roi.x;
-  // if(roi.y + roi.height > patch.getDepth()->rows) roi.height = patch.getDepth()->rows - roi.y;
+  if(roi.x < 0) roi.x = 0;
+  if(roi.y < 0) roi.y = 0;
+  if(roi.x + roi.width > patch.getDepth()->cols) roi.width = patch.getDepth()->cols - roi.x;
+  if(roi.y + roi.height > patch.getDepth()->rows) roi.height = patch.getDepth()->rows - roi.y;
 
-  // patch.setRoi(roi);
+  patch.setRoi(roi);
 
-  // return 0;
+  return 0;
 }
 
 int normarizationCenterPointP(CPosPatch &patch, const CConfig &config, double cd){//, const CConfig &config)const {
-  // cv::Mat tempDepth = *patch.getDepth();
-  // cv::Mat depth = tempDepth(patch.getRoi());
 
   cv::Mat tempFeature = *patch.getFeature(4);
   cv::Rect tempRect = patch.getRoi();
@@ -819,38 +756,11 @@ int normarizationCenterPointP(CPosPatch &patch, const CConfig &config, double cd
   
   double sca = a;
   
-  //cv::Mat showDepth = cv::Mat(tempDepth.rows, tempDepth.cols, CV_8UC1);
-
-  //tempDepth.convertTo(showDepth, CV_8UC1, 255 / 1000);
-
-  //cv::namedWindow("test");
-  //cv::imshow("test", showDepth);
-  //cv::waitKey(0);
-  //cv::destroyWindow("test");
-
-  //calc width and height scale
-  //std::cout << depth.type() << " " << CV_8U << std::endl;
-  //std::cout << config.p_height / 2 + 1 <<  config.p_width / 2 + 1 << std::endl;
-  //  std::cout << "depth rows and cols " << depth.rows << " " << depth.cols << std::endl;
-  //double centerDepth = depth.at<ushort>(config.p_height / 2 + 1, config.p_width / 2 + 1) + config.mindist;
   cv::Point_<double> currentP = patch.getRelativePosition();
 
-  //  double sca = tempDepth.at<ushort>(config.p_height / 2 + 1, config.p_width / 2 + 1);
-  //  if(sca == 0)
-  //  exit(-1);
-  //std::cout << "current p before " << currentP << std::endl;
-  //std::cout << sca << std::endl;
-
-  //    currentP.x = currentP.x * 10;
-  //  currentP.y *= 1000;
-  //  currentP.x *= 1000;
   currentP.x *= sca;
   currentP.y *= sca;
 
-  //std::cout << "current p " << currentP << std::endl;
-
-  //std::cout << "kokomade" << std::endl;
-  //  std::cout << "heknak go " << currentP << std::endl;
   patch.setRelativePosition(currentP);
 
   return 0;

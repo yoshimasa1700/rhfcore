@@ -97,11 +97,11 @@ void CRForest::growATree(const int treeNum){
   CRTree *tree = new CRTree(conf.min_sample, conf.max_depth, this->classDatabase);
   std::cout << "tree created" << std::endl;
 
-#pragma omp critical
+  //#pragma omp critical
   extractPosPatches(posSet,posPatch,conf,treeNum,this->classDatabase);
   std::cout << "start extract negpatches "  << posSet.size() << std::endl;
   extractNegPatches(negSet,negPatch,conf);
-#pragma omp critical
+  //#pragma omp critical
 
   
   std::cout << "extracted pathes" << std::endl;
@@ -242,7 +242,7 @@ CDetectionResult CRForest::detection(CTestDataset &testSet) const{
 	    for(unsigned int n = 0; n < result[m]->param[cl].size(); ++n){
 	      cv::Point_<double> patchSize(conf.p_height/2,conf.p_width/2);
 
-	      cv::Point_<double> rPoint = result[m]->param[cl][n].getCenterPoint();
+	      cv::Point_<double> rPoint = result[m]->param[cl][n].getRelativePoint();
 
 	      if(conf.learningMode != 2){
 	      	cv::Mat tempDepth = *testPatch[j].getDepth();
@@ -287,7 +287,7 @@ CDetectionResult CRForest::detection(CTestDataset &testSet) const{
                 //   v *= centerDepth;
 
                 if((rPoint.x)*(rPoint.x) + (rPoint.y)*(rPoint.y) > 25)
-                  voteImage[cl].at<float>(pos.y,pos.x) += v / 500;// * 10;//(result.at(m)->pfg.at(c) - 0.9);// * 100;//weight * 500;
+                  voteImage[cl].at<float>(pos.y,pos.x) += v * 10 ;/// 500;// * 10;//(result.at(m)->pfg.at(c) - 0.9);// * 100;//weight * 500;
 		// if(!conf.tsukubaMode){
 		  double ta[3] = {result.at(m)->param.at(l).at(n).getAngle()[0],
 				  result.at(m)->param.at(l).at(n).getAngle()[1],
