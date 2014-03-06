@@ -106,7 +106,6 @@ int CDataset::loadImage(const CConfig &conf){
       std::cout << "error! invarid rgb image please use 3 channel color image" << std::endl;
     }
     
-
     // cv::Mat maskImage = cv::imread(mask);
     // if(maskImage.data != NULL){
     //   maskImage /= 255;
