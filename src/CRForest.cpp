@@ -301,13 +301,13 @@ CDetectionResult CRForest::detection(CTestDataset &testSet) const{
 	      // vote to result image
 	      if(pos.x > 0 && pos.y > 0 && pos.x < voteImage[cl].cols && pos.y < voteImage[cl].rows){
                 cv::Size classsize = classDatabase.vNode[cl].classSize;
-		double v = result[m]->pfg[cl];// / result.at(m)->param.at(l).size() / conf.ntrees * conf.stride * conf.stride / classsize.width / classsize.height * 10000;// / ( result.size() * result.at(m)->param.at(l).size());// / (euclideanDist(cv::Point(), rPoint) + 1);
+		double v = 1;//result[m]->pfg[cl];// / result.at(m)->param.at(l).size() / conf.ntrees * conf.stride * conf.stride / classsize.width / classsize.height * 10000;// / ( result.size() * result.at(m)->param.at(l).size());// / (euclideanDist(cv::Point(), rPoint) + 1);
 
                 // if(conf.learningMode != 2)
                 //   v *= centerDepth;
 
                 if((rPoint.x)*(rPoint.x) + (rPoint.y)*(rPoint.y) > 25)
-                  voteImage[cl].at<float>(pos.y,pos.x) += v * 10 ;/// 500;// * 10;//(result.at(m)->pfg.at(c) - 0.9);// * 100;//weight * 500;
+                  voteImage[cl].at<float>(pos.y,pos.x) += v;// * 10 ;/// 500;// * 10;//(result.at(m)->pfg.at(c) - 0.9);// * 100;//weight * 500;
 		// if(!conf.tsukubaMode){
 		  double ta[3] = {result.at(m)->param.at(l).at(n).getAngle()[0],
 				  result.at(m)->param.at(l).at(n).getAngle()[1],
@@ -461,10 +461,10 @@ CDetectionResult CRForest::detection(CTestDataset &testSet) const{
 
       //      std::cout << tempSize << std::endl;
       //      std::cout << centerDepth << std::endl;
-      if(centerDepth != 0){
-        tempSize.height /=  (int)centerDepth;
-        tempSize.width /= (int)centerDepth;
-      }
+      // if(centerDepth != 0){
+         tempSize.height /=  (int)centerDepth;
+         tempSize.width /= (int)centerDepth;
+      // }
       //      std::cout << tempSize << std::endl;
     }
     
