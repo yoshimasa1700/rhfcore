@@ -256,11 +256,10 @@ void extractPosPatches(std::vector<CPosDataset*> &posSet,
                        const int treeNum,
                        const CClassDatabase &classDatabase){
   cv::Rect tempRect;
-  std::vector<CPosPatch> tPosPatch(0);//, posPatch(0);
+  std::vector<CPosPatch> tPosPatch(0);
   std::vector<std::vector<CPosPatch> > patchPerClass(classDatabase.vNode.size());
-  //int pixNum;
-  nCk nck;
-  int classNum = 0;
+  nCk nck; // combination calculator
+  int classNum = 0; // contain class number
   cv::Mat roi;
 
   posPatch.clear();
@@ -310,7 +309,7 @@ void extractPosPatches(std::vector<CPosDataset*> &posSet,
             
             if(posTemp.getRoi().width < 10 || posTemp.getRoi().height < 10){
               centerDepthFlag = 0;
-              //              std::cout << posTemp.getRoi() << std::endl;
+              std::cout << "scaled patch is too small!! please set patch size more bigger " << posTemp.getRoi() << std::endl;
             }
 	    //}
 
@@ -321,7 +320,7 @@ void extractPosPatches(std::vector<CPosDataset*> &posSet,
 	    //std::cout << posTemp.getRoi().width << std::endl;
 	  }else{
 	    centerDepthFlag = 0;
-            //            std::cout << "zero deshi ta" << std::endl;
+            //            std::cout << "the patch's center point's depth is zero" << std::endl;
           }
 	}
 	if(posTemp.getRoi().width > 10 && posTemp.getRoi().height > 10 &&centerDepthFlag == 1){

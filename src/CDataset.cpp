@@ -47,27 +47,9 @@ void cropImageAndDepth(cv::Mat* rgb, cv::Mat* depth, double mindist, double maxd
   cv::Mat allMaxDepth = cv::Mat::ones(depth->rows, depth->cols, CV_16U) * (ushort)maxdist;
 
   cv::Mat allMaxDepthOne = cv::Mat::ones(depth->rows, depth->cols, CV_16U) * (ushort)(maxdist-1);
-  //  cv::Mat kasu;
 
   cv::min(*depth, allMaxDepth, *depth);
-  //  cv::XorS(*depth, (ushort)maxdist, *depth);
-  ///cv::bitwise_not(allMaxDepth, allMaxDepth);
-  //  *depth = ~(*depth);
   cv::bitwise_and(allMaxDepthOne, *depth, *depth);
-  //  cv::temp = allMaxDepth - *depth;
-  
-  
-  //   cv::Mat showDepth;
-  // cv::namedWindow("test2");
-  // depth->convertTo(showDepth, CV_8U, 255.0/1000);
-  // cv::imshow("test2", showDepth);
-  // cv::waitKey(0);
-  //  cv::bitwise_not(*depth, *depth);
-
-
-
-  //  *depth -= kasu;
-
 }
 
 CDataset::CDataset()
