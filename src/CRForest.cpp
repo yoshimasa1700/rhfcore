@@ -515,7 +515,9 @@ CDetectionResult CRForest::detection(CTestDataset &testSet) const{
 
     CDetectedClass detectedClass;
     detectedClass.name = classDatabase.vNode[c].name;
-    detectedClass.angle[0] = max_pose[0].x;
+    detectedClass.angle[0] = max_pose[0].x - 180;
+    detectedClass.angle[1] = max_pose[1].x - 180;
+    detectedClass.angle[2] = max_pose[2].x - 180;
 
     double minError = 10000000;
 
