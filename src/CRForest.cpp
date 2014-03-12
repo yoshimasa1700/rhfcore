@@ -301,7 +301,7 @@ CDetectionResult CRForest::detection(CTestDataset &testSet) const{
 	      // vote to result image
 	      if(pos.x > 0 && pos.y > 0 && pos.x < voteImage[cl].cols && pos.y < voteImage[cl].rows){
                 cv::Size classsize = classDatabase.vNode[cl].classSize;
-		double v = 1;//result[m]->pfg[cl];// / result.at(m)->param.at(l).size() / conf.ntrees * conf.stride * conf.stride / classsize.width / classsize.height * 10000;// / ( result.size() * result.at(m)->param.at(l).size());// / (euclideanDist(cv::Point(), rPoint) + 1);
+		double v = result[m]->pfg[cl];// / result.at(m)->param.at(l).size() / conf.ntrees * conf.stride * conf.stride / classsize.width / classsize.height * 10000;// / ( result.size() * result.at(m)->param.at(l).size());// / (euclideanDist(cv::Point(), rPoint) + 1);
 
                 // if(conf.learningMode != 2)
                 //   v *= centerDepth;
@@ -309,18 +309,18 @@ CDetectionResult CRForest::detection(CTestDataset &testSet) const{
                 if((rPoint.x)*(rPoint.x) + (rPoint.y)*(rPoint.y) > 25)
                   voteImage[cl].at<float>(pos.y,pos.x) += v;// * 10 ;/// 500;// * 10;//(result.at(m)->pfg.at(c) - 0.9);// * 100;//weight * 500;
 		// if(!conf.tsukubaMode){
-		  double ta[3] = {result.at(m)->param.at(l).at(n).getAngle()[0],
-				  result.at(m)->param.at(l).at(n).getAngle()[1],
-				  result.at(m)->param.at(l).at(n).getAngle()[2]};
-                  //                  std::cout << ta[0] << " " << ta[1] << " " << ta[2] << std::endl;
-		  if(paramVote[cl][pos.y][pos.x])
-		    paramVote[cl][pos.y][pos.x]->addChild(v, ta[0], ta[1], ta[2]);
-		  else
-		    paramVote[cl][pos.y][pos.x] 
-		      = boost::shared_ptr<paramBin>
-		      (new paramBin(v , ta[0], ta[1], ta[2]));
+		  // double ta[3] = {result.at(m)->param.at(l).at(n).getAngle()[0],
+		  //       	  result.at(m)->param.at(l).at(n).getAngle()[1],
+		  //       	  result.at(m)->param.at(l).at(n).getAngle()[2]};
 
-		// cv::Scalar hanabi;
+		  // if(paramVote[cl][pos.y][pos.x])
+		  //   paramVote[cl][pos.y][pos.x]->addChild(v, ta[0], ta[1], ta[2]);
+		  // else
+		  //   paramVote[cl][pos.y][pos.x] 
+		  //     = boost::shared_ptr<paramBin>
+		  //     (new paramBin(v , ta[0], ta[1], ta[2]));
+
+
 
 		// switch(cl){
 		// case 0:
@@ -414,42 +414,42 @@ CDetectionResult CRForest::detection(CTestDataset &testSet) const{
     cv::Point min_pose[3], max_pose[3];
 
     cv::Mat voteAngle = cv::Mat::zeros(3, 720, CV_32FC1);
-#pragma omp parallel
-    {
-#pragma omp for
-      for(int x = -1 * conf.poseEC; x < conf.poseEC; ++x){
-        for(int y = -1 * conf.poseEC + x ; y < conf.poseEC - x; ++y){
+// #pragma omp parallel
+//     {
+// #pragma omp for
+//       for(int x = -1 * conf.poseEC; x < conf.poseEC; ++x){
+//         for(int y = -1 * conf.poseEC + x ; y < conf.poseEC - x; ++y){
         
-          if(maxLoc.x + x < imgCol &&
-             maxLoc.y + y < imgRow &&
-             maxLoc.x + x > 0 &&
-             maxLoc.y + y > 0){
-            boost::shared_ptr<paramBin> pBin = paramVote[c][maxLoc.y + y][maxLoc.x +x];
-            int pp = 10;
-            while(pBin && pp > 0){
-              //              std::cout << pBin->roll << " " << pBin->pitch << " " << pBin->yaw << std::endl;
-              voteAngle.row(0) += calcGaussian(pBin->confidence, pBin->roll);//at<>[0][pBin->roll] 
-              voteAngle.row(1) += calcGaussian(pBin->confidence, pBin->pitch);//at<>[0][pBin->roll] 
-              voteAngle.row(2) += calcGaussian(pBin->confidence, pBin->yaw);//at<>[0][pBin->roll]
-              pp --;
-              pBin = pBin->next;
-            }
-          }
+//           if(maxLoc.x + x < imgCol &&
+//              maxLoc.y + y < imgRow &&
+//              maxLoc.x + x > 0 &&
+//              maxLoc.y + y > 0){
+//             boost::shared_ptr<paramBin> pBin = paramVote[c][maxLoc.y + y][maxLoc.x +x];
+//             int pp = 10;
+//             while(pBin && pp > 0){
+//               //              std::cout << pBin->roll << " " << pBin->pitch << " " << pBin->yaw << std::endl;
+//               voteAngle.row(0) += calcGaussian(pBin->confidence, pBin->roll);//at<>[0][pBin->roll] 
+//               voteAngle.row(1) += calcGaussian(pBin->confidence, pBin->pitch);//at<>[0][pBin->roll] 
+//               voteAngle.row(2) += calcGaussian(pBin->confidence, pBin->yaw);//at<>[0][pBin->roll]
+//               pp --;
+//               pBin = pBin->next;
+//             }
+//           }
         
-        }
-      }
-    }
+//         }
+//       }
+//     }
 
-    cv::flip(voteAngle(cv::Rect(0,0,180,3)), voteAngle(cv::Rect(0,0,180,3)), 1);
-    cv::flip(voteAngle(cv::Rect(540,0,180,3)), voteAngle(cv::Rect(540,0,180,3)), 1);
+    // cv::flip(voteAngle(cv::Rect(0,0,180,3)), voteAngle(cv::Rect(0,0,180,3)), 1);
+    // cv::flip(voteAngle(cv::Rect(540,0,180,3)), voteAngle(cv::Rect(540,0,180,3)), 1);
 
-    voteAngle(cv::Rect(180,0,180,3)) += voteAngle(cv::Rect(540,0,180,3));
-    voteAngle(cv::Rect(360,0,180,3)) += voteAngle(cv::Rect(0,0,180,3));
+    // voteAngle(cv::Rect(180,0,180,3)) += voteAngle(cv::Rect(540,0,180,3));
+    // voteAngle(cv::Rect(360,0,180,3)) += voteAngle(cv::Rect(0,0,180,3));
     
 
-    cv::minMaxLoc(voteAngle.row(0), &min_pose_value[0], &max_pose_value[0], &min_pose[0], &max_pose[0]);
-    cv::minMaxLoc(voteAngle.row(1), &min_pose_value[1], &max_pose_value[1], &min_pose[1], &max_pose[1]);
-    cv::minMaxLoc(voteAngle.row(2), &min_pose_value[2], &max_pose_value[2], &min_pose[2], &max_pose[2]);
+    // cv::minMaxLoc(voteAngle.row(0), &min_pose_value[0], &max_pose_value[0], &min_pose[0], &max_pose[0]);
+    // cv::minMaxLoc(voteAngle.row(1), &min_pose_value[1], &max_pose_value[1], &min_pose[1], &max_pose[1]);
+    // cv::minMaxLoc(voteAngle.row(2), &min_pose_value[2], &max_pose_value[2], &min_pose[2], &max_pose[2]);
 
     // draw detected class bounding box to result image
     // if you whant add condition of detection threshold, add here
