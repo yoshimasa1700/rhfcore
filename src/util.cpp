@@ -325,18 +325,20 @@ void extractPosPatches(std::vector<CPosDataset*> &posSet,
 	}
 	if(posTemp.getRoi().width > 10 && posTemp.getRoi().height > 10 &&centerDepthFlag == 1){
 	  std::vector<double> pRatio(0);
-          //          pRatio.push_back(0.5);
-	  pRatio.push_back(1.0);
-	  //pRatio.push_back(1.4);
-          // pRatio.push_back(1.5);
-          // // if(conf.learningMode == 2){
-          // pRatio.push_back(2.0);
-          // pRatio.push_back(2.5);
-          // pRatio.push_back(3.0);
-          // // }
-	  // pRatio.push_back(3.5);
-          // pRatio.push_back(4.0);
 
+	  pRatio.push_back(1.0);
+          if(conf.learningMode == 2){
+            pRatio.push_back(0.5);
+            //pRatio.push_back(1.4);
+            pRatio.push_back(1.5);
+          
+            pRatio.push_back(2.0);
+            // pRatio.push_back(2.5);
+            // pRatio.push_back(3.0);
+            // // }
+            // pRatio.push_back(3.5);
+            // pRatio.push_back(4.0);
+          }
 	  for(unsigned int r = 0; r < pRatio.size(); ++r){
 	    CPosPatch transPatch = posTemp;  // copy constructor
 	    cv::Rect tempRoi = transPatch.getRoi();
