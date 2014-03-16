@@ -5,10 +5,7 @@ cv::Mat calcGaussian(double score, double center){
   cv::Mat vote = cv::Mat::zeros(1, 720, CV_32FC1);
   for(int i = -30; i <= 30; ++i){
     vote.at<float>(0, center + i + 180.0) += score * exp( -1 * abs( i * i ) / 142.0 );
-    //    std::cout << i << " " << exp( -1 * abs( i * i ) / 2.0 ) << std::endl;
   }
-
-  //  std::cout << vote << std::endl;
   return vote;
 }
 
@@ -20,13 +17,16 @@ double euclideanDist(cv::Point_<double> p, cv::Point_<double> q)
 
 void CRForest::learning(){
 
+  // code for openMP
 #pragma omp parallel num_threads(4)
   {
 #pragma omp for
+
     for(int i = 0;i < conf.ntrees; ++i){
       growATree(i);
     } // end tree loop
-    }
+    
+  }// openMP
 }
 
 void CRForest::growATree(const int treeNum){
@@ -309,16 +309,16 @@ CDetectionResult CRForest::detection(CTestDataset &testSet) const{
                 if((rPoint.x)*(rPoint.x) + (rPoint.y)*(rPoint.y) > 25)
                   voteImage[cl].at<float>(pos.y,pos.x) += v;// * 10 ;/// 500;// * 10;//(result.at(m)->pfg.at(c) - 0.9);// * 100;//weight * 500;
 		// if(!conf.tsukubaMode){
-		  // double ta[3] = {result.at(m)->param.at(l).at(n).getAngle()[0],
-		  //       	  result.at(m)->param.at(l).at(n).getAngle()[1],
-		  //       	  result.at(m)->param.at(l).at(n).getAngle()[2]};
+                // double ta[3] = {result.at(m)->param.at(l).at(n).getAngle()[0],
+                //       	  result.at(m)->param.at(l).at(n).getAngle()[1],
+                //       	  result.at(m)->param.at(l).at(n).getAngle()[2]};
 
-		  // if(paramVote[cl][pos.y][pos.x])
-		  //   paramVote[cl][pos.y][pos.x]->addChild(v, ta[0], ta[1], ta[2]);
-		  // else
-		  //   paramVote[cl][pos.y][pos.x] 
-		  //     = boost::shared_ptr<paramBin>
-		  //     (new paramBin(v , ta[0], ta[1], ta[2]));
+                // if(paramVote[cl][pos.y][pos.x])
+                //   paramVote[cl][pos.y][pos.x]->addChild(v, ta[0], ta[1], ta[2]);
+                // else
+                //   paramVote[cl][pos.y][pos.x] 
+                //     = boost::shared_ptr<paramBin>
+                //     (new paramBin(v , ta[0], ta[1], ta[2]));
 
 
 
@@ -357,26 +357,26 @@ CDetectionResult CRForest::detection(CTestDataset &testSet) const{
   //   std::cout << centerDepth << std::endl;
   //   std::cout << rpointa << std::endl;
 
-    // cv::line(*testSet.img[0], 
-    // 	     cv::Point(imgCol / 2 ,imgRow / 2), 
-    // 	     cv::Point(imgCol/2, rpointa), 
-    // 	     cv::Scalar(0, 0, 255), 1);
+  // cv::line(*testSet.img[0], 
+  // 	     cv::Point(imgCol / 2 ,imgRow / 2), 
+  // 	     cv::Point(imgCol/2, rpointa), 
+  // 	     cv::Scalar(0, 0, 255), 1);
   //}
   // vote end
   std::cout <<  "vote end" << std::endl;
 
-// #pragma omp parallel
-//   {
-// #pragma omp for
-    // find balance by mean shift
-   for(int i = 0; i < classNum; ++i){
-     cv::GaussianBlur(voteImage[i],voteImage[i], cv::Size(51,51),0);
-      //}
-    }
+  // #pragma omp parallel
+  //   {
+  // #pragma omp for
+  // find balance by mean shift
+  for(int i = 0; i < classNum; ++i){
+    cv::GaussianBlur(voteImage[i],voteImage[i], cv::Size(51,51),0);
+    //}
+  }
   //<<<<<<< HEAD
-   //  cv::imshow("hanabi2", hanabi2);
-   if(conf.showVote >= 0)
-     cv::imshow("vote", voteImage[conf.showVote]);
+  //  cv::imshow("hanabi2", hanabi2);
+  if(conf.showVote >= 0)
+    cv::imshow("vote", voteImage[conf.showVote]);
   // //  cv::waitKey(0);
   // //=======
 
@@ -414,31 +414,31 @@ CDetectionResult CRForest::detection(CTestDataset &testSet) const{
     cv::Point min_pose[3], max_pose[3];
 
     cv::Mat voteAngle = cv::Mat::zeros(3, 720, CV_32FC1);
-// #pragma omp parallel
-//     {
-// #pragma omp for
-//       for(int x = -1 * conf.poseEC; x < conf.poseEC; ++x){
-//         for(int y = -1 * conf.poseEC + x ; y < conf.poseEC - x; ++y){
+    // #pragma omp parallel
+    //     {
+    // #pragma omp for
+    //       for(int x = -1 * conf.poseEC; x < conf.poseEC; ++x){
+    //         for(int y = -1 * conf.poseEC + x ; y < conf.poseEC - x; ++y){
         
-//           if(maxLoc.x + x < imgCol &&
-//              maxLoc.y + y < imgRow &&
-//              maxLoc.x + x > 0 &&
-//              maxLoc.y + y > 0){
-//             boost::shared_ptr<paramBin> pBin = paramVote[c][maxLoc.y + y][maxLoc.x +x];
-//             int pp = 10;
-//             while(pBin && pp > 0){
-//               //              std::cout << pBin->roll << " " << pBin->pitch << " " << pBin->yaw << std::endl;
-//               voteAngle.row(0) += calcGaussian(pBin->confidence, pBin->roll);//at<>[0][pBin->roll] 
-//               voteAngle.row(1) += calcGaussian(pBin->confidence, pBin->pitch);//at<>[0][pBin->roll] 
-//               voteAngle.row(2) += calcGaussian(pBin->confidence, pBin->yaw);//at<>[0][pBin->roll]
-//               pp --;
-//               pBin = pBin->next;
-//             }
-//           }
+    //           if(maxLoc.x + x < imgCol &&
+    //              maxLoc.y + y < imgRow &&
+    //              maxLoc.x + x > 0 &&
+    //              maxLoc.y + y > 0){
+    //             boost::shared_ptr<paramBin> pBin = paramVote[c][maxLoc.y + y][maxLoc.x +x];
+    //             int pp = 10;
+    //             while(pBin && pp > 0){
+    //               //              std::cout << pBin->roll << " " << pBin->pitch << " " << pBin->yaw << std::endl;
+    //               voteAngle.row(0) += calcGaussian(pBin->confidence, pBin->roll);//at<>[0][pBin->roll] 
+    //               voteAngle.row(1) += calcGaussian(pBin->confidence, pBin->pitch);//at<>[0][pBin->roll] 
+    //               voteAngle.row(2) += calcGaussian(pBin->confidence, pBin->yaw);//at<>[0][pBin->roll]
+    //               pp --;
+    //               pBin = pBin->next;
+    //             }
+    //           }
         
-//         }
-//       }
-//     }
+    //         }
+    //       }
+    //     }
 
     // cv::flip(voteAngle(cv::Rect(0,0,180,3)), voteAngle(cv::Rect(0,0,180,3)), 1);
     // cv::flip(voteAngle(cv::Rect(540,0,180,3)), voteAngle(cv::Rect(540,0,180,3)), 1);
@@ -462,8 +462,8 @@ CDetectionResult CRForest::detection(CTestDataset &testSet) const{
       //      std::cout << tempSize << std::endl;
       //      std::cout << centerDepth << std::endl;
       // if(centerDepth != 0){
-         tempSize.height /=  (int)centerDepth;
-         tempSize.width /= (int)centerDepth;
+      tempSize.height /=  (int)centerDepth;
+      tempSize.width /= (int)centerDepth;
       // }
       //      std::cout << tempSize << std::endl;
     }
@@ -496,12 +496,12 @@ CDetectionResult CRForest::detection(CTestDataset &testSet) const{
 
     // show result
     std::cout << c << " Name : " << classDatabase.vNode[c].name <<
-      "\tvote : " << classVoteNum[c] <<
-      " Score : " << voteImage[c].at<float>(maxLoc.y, maxLoc.x) <<
-      " CenterPoint : " << maxLoc << std::endl <<
-      " Pose : roll " << max_pose[0].x - 180 <<
-      " pitch : " << max_pose[1].x - 180 <<
-      " yaw : " << max_pose[2].x - 180 << std::endl;
+        "\tvote : " << classVoteNum[c] <<
+        " Score : " << voteImage[c].at<float>(maxLoc.y, maxLoc.x) <<
+        " CenterPoint : " << maxLoc << std::endl <<
+        " Pose : roll " << max_pose[0].x - 180 <<
+        " pitch : " << max_pose[1].x - 180 <<
+        " yaw : " << max_pose[2].x - 180 << std::endl;
 
     
 
@@ -546,17 +546,17 @@ CDetectionResult CRForest::detection(CTestDataset &testSet) const{
     detectResult.detectedClass.push_back(detectedClass);
   } // for every class
 
-    // if(!conf.demoMode){
-    //   cv::namedWindow("test");
-    //   cv::imshow("test", showVoteImage);
-    //   cv::namedWindow("test2");
-    //   cv::imshow("test2", outputImage[0]);
-    //   cv::namedWindow("test3");
-    //   cv::imshow("test3", votedVectors);
-    //   cv::imwrite("hanabi.png",votedVectors);
+  // if(!conf.demoMode){
+  //   cv::namedWindow("test");
+  //   cv::imshow("test", showVoteImage);
+  //   cv::namedWindow("test2");
+  //   cv::imshow("test2", outputImage[0]);
+  //   cv::namedWindow("test3");
+  //   cv::imshow("test3", votedVectors);
+  //   cv::imwrite("hanabi.png",votedVectors);
   
-    //   cv::waitKey(0);
-    // }
+  //   cv::waitKey(0);
+  // }
 
   for(int k = 0; k < classNum; ++k){
     for(int i = 0; i < imgRow; ++i){
