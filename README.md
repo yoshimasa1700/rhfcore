@@ -15,9 +15,9 @@ Following programs are requrd to build:
 
 # Installation
 
-  $ cmake .
-  $ make
-  $ sudo make install
+    $ cmake .
+    $ make
+    $ sudo make install
 
 # Usage
 See also...
